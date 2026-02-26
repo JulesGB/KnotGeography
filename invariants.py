@@ -1,0 +1,48 @@
+import snappy
+import sage
+
+def symmetric_alexander_poly(K):
+    alex = K.alexander_polynomial(norm=False)
+    alex_sym = alex.shift(-min(alex.exponents()) // 2) 
+    if (alex_sym(1) == -1):
+        alex_sym *= -1
+    return alex_sym
+
+# d-invariant
+def d_invariant(T_pq):
+    alex_sym = symmetric_alexander_poly(T_pq)
+    coeff_dict = alex_sym.dict()
+    pos_exponents = [k for k in coeff_dict.keys() if k>0]
+    
+    d_T = 0
+    for j in pos_exponents:
+        d_T += j * coeff_dict[j] # j * a_j
+        
+    return 2 * d_T
+
+# Upsilon(1)
+def compute_m(idx, alpha_dict):
+    if idx == 0:
+        return 0
+
+    k = idx // 2
+    if idx % 2 == 0:
+        return compute_m(2*k-1, alpha_dict) - 1
+    else:
+        return compute_m(2*k, alpha_dict) - 2 * (alpha_dict[2*k] - alpha_dict[2*k+1]) + 1
+
+# computes Upsilon(1) for positive torus knots T(p,q)
+def upsilon(Tpq, t=1):
+    alex = symmetric_alexander_poly(Tpq)
+    coeff_dict = alex.dict()
+    
+    alphas = [alpha_k for alpha_k in coeff_dict.keys()]
+    n = len(alphas) - 1
+    alpha_dict = {n-i : alpha 
+                  for i, alpha in zip(range(len(alphas)), alphas)}
+
+    values = [compute_m(2*i, alpha_dict) - t * alpha_dict[2*i] 
+              for i in range(0, n//2)]
+    return max(values)
+
+# nu
