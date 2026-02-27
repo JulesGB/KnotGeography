@@ -38,10 +38,14 @@ def adjacency_graph(knot: Link, rad_increment=0.15):
         
     return G
     
-def draw_adjacency_graph(knot: Link, head_pos=0.1, tail_pos=0.9, rad_increment=0.15):
+def draw_adjacency_graph(knot: Link, head_pos=0.1, tail_pos=0.9, rad_increment=0.15, layout=None):
     G = adjacency_graph(knot, rad_increment=rad_increment)
-    #layout = nx.spring_layout(G)
-    layout = nx.planar_layout(G)
+
+    if layout is None:
+        #layout = nx.spring_layout(G)
+        layout = nx.planar_layout(G)
+    else:
+        layout = layout(G)
     
     connectionstyle = [f'arc3,rad={attrs['rad']}'
                        for *edge, attrs in G.edges(keys=True, data=True)]
@@ -54,7 +58,7 @@ def draw_adjacency_graph(knot: Link, head_pos=0.1, tail_pos=0.9, rad_increment=0
                     for u,v,k, attrs in G.edges(keys=True, data=True)}
 
     nx.draw_networkx_nodes(G, pos=layout)
-    nx.draw_networkx_labels(G, pos=layout)
+    nx.draw_networkx_labels(G, pos=layout, font_size=8)
     nx.draw_networkx_edges(G, pos=layout,
                            arrowsize=0.00001, connectionstyle=connectionstyle)
 
