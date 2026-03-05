@@ -58,10 +58,22 @@ def adjacency_graph(knot: Link, rad_increment=0.15):
             G.edges[u,v,0]['rad'] = 0
         else:
             #edge_keys = G.get_edge_data(u,v) | G.get_edge_data(v,u)
-            edge_keys = G.get_edge_data(u,v)
+            in_edge_keys = G.get_edge_data(v,u)
+            out_edge_keys = G.get_edge_data(u,v)
+            
             possible_rads = [(i+1) * rad_increment for i in range(4)]
-            for i,k in zip(range(len(edge_keys)), edge_keys):
-                G.edges[u,v,k]['rad'] = (-1)**i * possible_rads[i//2]
+            i = 0
+            if out_edge_keys is not None:
+                for k in out_edge_keys:
+                    G.edges[u,v,k]['rad'] = (-1)**i * possible_rads[i//2]
+                    i += 1
+            if in_edge_keys is not None:
+                for k in in_edge_keys:
+                    G.edges[v,u,k]['rad'] = (-1)**i * possible_rads[i//2]
+                    i += 1
+            #print(f'u={u}, v={v}')
+            #print(f'out edges: {G.edges[u,v,0]}')
+            #print(f'in edges: {G.edges[v,u,0]}')
         
     return G
     
@@ -83,7 +95,7 @@ def draw_adjacency_graph(knot: Link, head_pos=0.1, tail_pos=0.9, rad_increment=0
                     for u,v,k, attrs in G.edges(keys=True, data=True)}
     tail_strands = {(u,v,k) : attrs['tail_strand'] 
                     for u,v,k, attrs in G.edges(keys=True, data=True)}
-
+    pdb.set_trace()
     nx.draw_networkx_nodes(G, pos=layout)
     nx.draw_networkx_labels(G, pos=layout, font_size=8)
     nx.draw_networkx_edges(G, pos=layout,
