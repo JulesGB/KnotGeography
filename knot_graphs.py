@@ -4,6 +4,8 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
 
+import pdb
+
 def adjacency_graph(knot: Link, rad_increment=0.15):
     crossing_labels = [c.label for c in knot.crossings]
     G = nx.MultiDiGraph()
@@ -11,26 +13,51 @@ def adjacency_graph(knot: Link, rad_increment=0.15):
     for c in knot.crossings:
         c0 = c.label
         adj = c.adjacent
-        for i, (c1,s1) in zip(range(len(adj)), adj):
-            # check if the arc has already been added
-            if G.has_edge(c1.label, c0):
-                data = G.get_edge_data(c1.label, c0)
-                arc_already_exists = False
-                for d in data.values():
-                    if d['head_strand'] == i and d['tail_strand'] == s1:
-                        arc_already_exists = True
-                        break
-                if arc_already_exists: continue
-                    
-            G.add_edge(c0, c1.label,
-                           head_strand=s1, tail_strand=i)
+        #c2, s2 = adj[2]
+        #c3, s3 = adj[3]
+        #G.add_edge(c0, c2.label, head_strand=s2, tail_strand=2)
+        #G.add_edge(c0, c3.label, head_strand=s3, tail_strand=3)
+        #pdb.set_trace()
+
+        # strand 2 is always outgoing, regardless of sign
+        c2, s2 = adj[2]
+        G.add_edge(c0, c2.label, head_strand=s2, tail_strand=2)
+        if (3,1) in c.directions: # c0 is positive
+            # strand 1 is outgoing for positive crossings
+            c1, s1 = adj[1]
+            G.add_edge(c0, c1.label, head_strand=s1, tail_strand=1)
+        else: # c0 is negative
+            # strand 3 is outgoing for negative crossings
+            c3, s3 = adj[3]
+            G.add_edge(c0, c3.label, head_strand=s3, tail_strand=3)
+        
+        #for i, (c1,s1) in zip(range(len(adj)), adj):
+        #    #if i == 0 or i == 1: # out edges are always strands 2 and 3
+        #    #    continue
+        #    pdb.set_trace()
+        #    
+        #    #check if the arc has already been added
+        #    if G.has_edge(c1.label, c0):
+        #        data = G.get_edge_data(c1.label, c0)
+        #        arc_already_exists = False
+        #        for d in data.values():
+        #            if d['head_strand'] == i and d['tail_strand'] == s1:
+        #                arc_already_exists = True
+        #                break
+        #        if arc_already_exists: continue
+        #            
+        #    G.add_edge(c0, c1.label,
+        #                   head_strand=s1, tail_strand=i)
 
     # update curvature for each edge
+    #pdb.set_trace()
     for u,v in set(G.edges()):
-        num_uv_edges = G.number_of_edges(u,v)
+        #pdb.set_trace()
+        num_uv_edges = G.number_of_edges(u,v) + G.number_of_edges(v,u)
         if num_uv_edges == 1:
             G.edges[u,v,0]['rad'] = 0
         else:
+            #edge_keys = G.get_edge_data(u,v) | G.get_edge_data(v,u)
             edge_keys = G.get_edge_data(u,v)
             possible_rads = [(i+1) * rad_increment for i in range(4)]
             for i,k in zip(range(len(edge_keys)), edge_keys):
@@ -38,7 +65,7 @@ def adjacency_graph(knot: Link, rad_increment=0.15):
         
     return G
     
-def draw_adjacency_graph(knot: Link, head_pos=0.1, tail_pos=0.9, rad_increment=0.15, layout=None):
+def draw_adjacency_graph(knot: Link, head_pos=0.1, tail_pos=0.9, rad_increment=0.15, layout=None, arrow_size=10):
     G = adjacency_graph(knot, rad_increment=rad_increment)
 
     if layout is None:
@@ -60,7 +87,7 @@ def draw_adjacency_graph(knot: Link, head_pos=0.1, tail_pos=0.9, rad_increment=0
     nx.draw_networkx_nodes(G, pos=layout)
     nx.draw_networkx_labels(G, pos=layout, font_size=8)
     nx.draw_networkx_edges(G, pos=layout,
-                           arrowsize=0.00001, connectionstyle=connectionstyle)
+                           arrowsize=arrow_size, connectionstyle=connectionstyle)
 
     my_draw_networkx_edge_labels(G, edge_labels=head_strands,
                                  pos=layout, label_pos=head_pos,
