@@ -4,7 +4,6 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
 
-import pdb
 
 def adjacency_graph(knot: Link, rad_increment=0.15):
     crossing_labels = [c.label for c in knot.crossings]
@@ -13,15 +12,11 @@ def adjacency_graph(knot: Link, rad_increment=0.15):
     for c in knot.crossings:
         c0 = c.label
         adj = c.adjacent
-        #c2, s2 = adj[2]
-        #c3, s3 = adj[3]
-        #G.add_edge(c0, c2.label, head_strand=s2, tail_strand=2)
-        #G.add_edge(c0, c3.label, head_strand=s3, tail_strand=3)
-        #pdb.set_trace()
 
         # strand 2 is always outgoing, regardless of sign
         c2, s2 = adj[2]
         G.add_edge(c0, c2.label, head_strand=s2, tail_strand=2)
+        
         if (3,1) in c.directions: # c0 is positive
             # strand 1 is outgoing for positive crossings
             c1, s1 = adj[1]
@@ -31,50 +26,28 @@ def adjacency_graph(knot: Link, rad_increment=0.15):
             c3, s3 = adj[3]
             G.add_edge(c0, c3.label, head_strand=s3, tail_strand=3)
         
-        #for i, (c1,s1) in zip(range(len(adj)), adj):
-        #    #if i == 0 or i == 1: # out edges are always strands 2 and 3
-        #    #    continue
-        #    pdb.set_trace()
-        #    
-        #    #check if the arc has already been added
-        #    if G.has_edge(c1.label, c0):
-        #        data = G.get_edge_data(c1.label, c0)
-        #        arc_already_exists = False
-        #        for d in data.values():
-        #            if d['head_strand'] == i and d['tail_strand'] == s1:
-        #                arc_already_exists = True
-        #                break
-        #        if arc_already_exists: continue
-        #            
-        #    G.add_edge(c0, c1.label,
-        #                   head_strand=s1, tail_strand=i)
-
     # update curvature for each edge
-    #pdb.set_trace()
     for u,v in set(G.edges()):
-        #pdb.set_trace()
         num_uv_edges = G.number_of_edges(u,v) + G.number_of_edges(v,u)
         if num_uv_edges == 1:
             G.edges[u,v,0]['rad'] = 0
         else:
-            #edge_keys = G.get_edge_data(u,v) | G.get_edge_data(v,u)
             in_edge_keys = G.get_edge_data(v,u)
             out_edge_keys = G.get_edge_data(u,v)
+
+            flip = -1 if (in_edge_keys is None or out_edge_keys is None) else 1
             
             possible_rads = [(i+1) * rad_increment for i in range(4)]
             i = 0
             if out_edge_keys is not None:
                 for k in out_edge_keys:
-                    G.edges[u,v,k]['rad'] = (-1)**i * possible_rads[i//2]
+                    G.edges[u,v,k]['rad'] = -(flip**i) * possible_rads[i//2]
                     i += 1
             if in_edge_keys is not None:
                 for k in in_edge_keys:
-                    G.edges[v,u,k]['rad'] = (-1)**i * possible_rads[i//2]
+                    G.edges[v,u,k]['rad'] = -(flip**i) * possible_rads[i//2]
                     i += 1
-            #print(f'u={u}, v={v}')
-            #print(f'out edges: {G.edges[u,v,0]}')
-            #print(f'in edges: {G.edges[v,u,0]}')
-        
+                    
     return G
     
 def draw_adjacency_graph(knot: Link, head_pos=0.1, tail_pos=0.9, rad_increment=0.15, layout=None, arrow_size=10):
@@ -85,17 +58,17 @@ def draw_adjacency_graph(knot: Link, head_pos=0.1, tail_pos=0.9, rad_increment=0
         layout = nx.planar_layout(G)
     else:
         layout = layout(G)
-    
+
     connectionstyle = [f'arc3,rad={attrs['rad']}'
                        for *edge, attrs in G.edges(keys=True, data=True)]
     rads = {(u,v,k) : attrs['rad']
             for u,v,k, attrs in G.edges(keys=True, data=True)}
-                           
+
     head_strands = {(u,v,k) : attrs['head_strand'] 
                     for u,v,k, attrs in G.edges(keys=True, data=True)}
     tail_strands = {(u,v,k) : attrs['tail_strand'] 
                     for u,v,k, attrs in G.edges(keys=True, data=True)}
-    pdb.set_trace()
+
     nx.draw_networkx_nodes(G, pos=layout)
     nx.draw_networkx_labels(G, pos=layout, font_size=8)
     nx.draw_networkx_edges(G, pos=layout,
