@@ -45,4 +45,39 @@ def upsilon(Tpq, t=1):
               for i in range(0, n//2)]
     return max(values)
 
-# nu
+# Convert khovanov.Link's to snappy.Link's
+def kh_pairings(khL):
+    C = khL.crossings
+    idx = {X: k for k, X in enumerate(C)}
+    pairings = []
+    used = set()
+
+    for c, X in enumerate(C):
+        for i in range(4):
+            Y, j = X.adjacent[i]
+            d = idx[Y]
+            a = (c, i)
+            b = (d, j)
+            if a in used or b in used:
+                continue
+            used.add(a); used.add(b)
+            pairings.append((a, b))
+    return pairings
+
+def kh_to_snappy(khL):
+    Ckh = khL.crossings
+    idx = {X: k for k, X in enumerate(Ckh)}
+
+    Csn = [snappy.Crossing(k) for k in range(len(Ckh))]
+
+    seen = set()
+    for c, X in enumerate(Ckh):
+        for i in range(4):
+            (Y, j) = X.adjacent[i]
+            d = idx[Y]
+            if (d, j, c, i) in seen:
+                continue
+            Csn[c][i] = Csn[d][j]
+            seen.add((c, i, d, j))
+
+    return snappy.Link(Csn)
