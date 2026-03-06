@@ -50,7 +50,7 @@ def adjacency_graph(knot: Link, rad_increment=0.15):
                     
     return G
     
-def draw_adjacency_graph(knot: Link, head_pos=0.1, tail_pos=0.9, rad_increment=0.15, layout=None, arrow_size=10):
+def draw_adjacency_graph(knot: Link, head_pos=0.0, tail_pos=1.0, rad_increment=0.15, layout=None, arrow_size=10):
     G = adjacency_graph(knot, rad_increment=rad_increment)
 
     if layout is None:
@@ -63,6 +63,8 @@ def draw_adjacency_graph(knot: Link, head_pos=0.1, tail_pos=0.9, rad_increment=0
                        for *edge, attrs in G.edges(keys=True, data=True)]
     rads = {(u,v,k) : attrs['rad']
             for u,v,k, attrs in G.edges(keys=True, data=True)}
+    print(connectionstyle)
+    print(rads)
 
     head_strands = {(u,v,k) : attrs['head_strand'] 
                     for u,v,k, attrs in G.edges(keys=True, data=True)}
@@ -74,10 +76,13 @@ def draw_adjacency_graph(knot: Link, head_pos=0.1, tail_pos=0.9, rad_increment=0
     nx.draw_networkx_edges(G, pos=layout,
                            arrowsize=arrow_size, connectionstyle=connectionstyle)
 
+    # head/target labels
     my_draw_networkx_edge_labels(G, edge_labels=head_strands,
                                  pos=layout, label_pos=head_pos,
                                  rad=rads, rad_increment=rad_increment,
                                  bbox={"alpha": 0}, font_color='r', rotate=False)
+
+    # tail/source labels
     my_draw_networkx_edge_labels(G, edge_labels=tail_strands,
                                  pos=layout, label_pos=tail_pos,
                                  rad=rads, rad_increment=rad_increment,
