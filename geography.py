@@ -107,13 +107,13 @@ def plot_upsilon_bound(K, erange=[-30,30], brange=[0,30],
     return fig, ax, ups
     
 def plot_bounds(K, erange=(-40,40), brange=(0,30),
-                resolution=300, show_grid=True):
+                resolution=300, show_grid=True, plot_intersection=True):
     fig, ax = plt.subplots()
     fig, ax, sig = plot_sig_bound(K, erange=erange, brange=brange, resolution=resolution, fig=fig, ax=ax)
     fig, ax, ups = plot_upsilon_bound(K, erange=erange, brange=brange, resolution=resolution, fig=fig, ax=ax)
 
     # if signature/upsilon bounds are different, find their intersection point
-    if (sig != 2 * ups):
+    if plot_intersection and (sig != 2 * ups):
         e_int = 2 * ups + sig
         b_int = int(ups - 0.5 * sig)
         ax.scatter([e_int], [b_int],
