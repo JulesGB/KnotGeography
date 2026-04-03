@@ -7,6 +7,7 @@ from invariants import *
 
 # See knot_geography.ipynb for usage
 
+# plots the knot signature bound | sigma - e/2 | <= b_1
 def plot_sig_bound(K, erange=(-30,30), brange=(0,30),
                    resolution=300, fig=None, ax=None,
                    plot_points=False, show_grid=True):
@@ -56,7 +57,8 @@ def plot_sig_bound(K, erange=(-30,30), brange=(0,30),
         plt.grid(False)
         
     return fig, ax, sigma
-    
+
+# plots the upsilon bound | -2 * upsilon(1) + e/2 | <= b_1
 def plot_upsilon_bound(K, erange=[-30,30], brange=[0,30],
                        resolution=300, fig=None, ax=None,
                        plot_points=False, show_grid=True):
