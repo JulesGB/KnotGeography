@@ -50,7 +50,8 @@ def adjacency_graph(knot: Link, rad_increment=0.15):
                     
     return G
     
-def draw_adjacency_graph(knot: Link, head_pos=0.0, tail_pos=1.0, rad_increment=0.15, layout=None, arrow_size=10):
+def draw_adjacency_graph(knot: Link, head_pos=0.0, tail_pos=1.0,
+                         rad_increment=0.15, layout=None, arrow_size=10):
     G = adjacency_graph(knot, rad_increment=rad_increment)
 
     if layout is None:
