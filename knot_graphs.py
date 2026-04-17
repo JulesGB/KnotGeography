@@ -64,8 +64,9 @@ def draw_adjacency_graph(knot: Link, head_pos=0.0, tail_pos=1.0,
                        for *edge, attrs in G.edges(keys=True, data=True)]
     rads = {(u,v,k) : attrs['rad']
             for u,v,k, attrs in G.edges(keys=True, data=True)}
-    print(connectionstyle)
-    print(rads)
+                           
+    #print(connectionstyle)
+    #print(rads)
 
     head_strands = {(u,v,k) : attrs['head_strand'] 
                     for u,v,k, attrs in G.edges(keys=True, data=True)}
